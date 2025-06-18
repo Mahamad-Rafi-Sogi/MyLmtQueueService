@@ -1,5 +1,6 @@
 package com.rafi.lmt.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -9,11 +10,12 @@ public class LmtQueue {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "head_id")
+    @JsonIgnore
     private LmtQueueElement head;
-
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "tail_id")
+    @JsonIgnore
     private LmtQueueElement tail;
 
     private String printerGatewayUrl;

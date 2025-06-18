@@ -1,6 +1,7 @@
 package com.rafi.lmt.service.impl;
 
 import com.rafi.lmt.dto.EnqueueRequest;
+import com.rafi.lmt.exception.QueueHeldException;
 import com.rafi.lmt.model.LmtQueue;
 import com.rafi.lmt.model.LmtQueueElement;
 import com.rafi.lmt.model.QueueState;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -25,16 +27,24 @@ public class LmtQueueServiceImpl implements LmtQueueService {
 
     @Override
     public void enqueue(EnqueueRequest request) {
-        LmtQueue queue = queueRepo.findById(request.lniata).orElseGet(() -> {
-            LmtQueue newQueue = new LmtQueue();
-            newQueue.setLniata(request.lniata);
-            newQueue.setState(QueueState.ACTIVE);
-            return queueRepo.save(newQueue);
-        });
+
+        Optional<LmtQueue> optionalQueue = queueRepo.findById(request.getLniata());
+        if (optionalQueue.isEmpty()) {
+            throw new IllegalArgumentException("invalid lniata");
+        }
+        LmtQueue queue = optionalQueue.get();
+
+        if (queue.getState() == QueueState.STOPPED) {
+            throw new IllegalStateException("Queue is stopped");
+        }
+
+        if (queue.getState() == QueueState.HELD) {
+            throw new QueueHeldException("Queue is held");
+        }
 
         LmtQueueElement newElement = new LmtQueueElement();
-        newElement.setLniata(request.lniata);
-        newElement.setData(Arrays.toString(request.data));
+        newElement.setLniata(request.getLniata());
+        newElement.setData(request.getData());
         newElement = elementRepo.save(newElement);
 
         if (queue.getHead() == null) {
@@ -48,7 +58,6 @@ public class LmtQueueServiceImpl implements LmtQueueService {
             queue.setTail(newElement);
         }
 
-        queue.setTail(newElement);
         queueRepo.save(queue);
     }
 
@@ -60,11 +69,15 @@ public class LmtQueueServiceImpl implements LmtQueueService {
     @Override
     public void dequeue(UUID elementId) {
         Optional<LmtQueueElement> optElement = elementRepo.findById(elementId);
-        if (optElement.isEmpty()) return;
+        if (optElement.isEmpty()) throw new NoSuchElementException("Element ID not found: " + elementId);;
 
         LmtQueueElement element = optElement.get();
         LmtQueue queue = queueRepo.findById(element.getLniata()).orElse(null);
         if (queue == null) return;
+
+        if (queue != null && queue.getState() == QueueState.HELD) {
+            throw new QueueHeldException("Queue is held");
+        }
 
         if (element.equals(queue.getHead())) {
             queue.setHead(element.getNext());
