@@ -6,9 +6,9 @@ import java.util.UUID;
 
 public interface LmtQueueService {
     void enqueue(EnqueueRequest request);
-    LmtQueue retrieve(Long lniata);
+    LmtQueue retrieve(String lniata);
     void dequeue(UUID elementId);
-    void changeState(Long lniata, QueueState state);
+    void changeState(String lniata, QueueState state);
 
-    void dequeueHead(Long lniata);
+    void dequeueHead(String lniata);
 }

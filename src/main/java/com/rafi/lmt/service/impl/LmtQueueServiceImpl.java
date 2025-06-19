@@ -1,7 +1,7 @@
 package com.rafi.lmt.service.impl;
 
 import com.rafi.lmt.dto.EnqueueRequest;
-import com.rafi.lmt.exception.QueueHeldException;
+import com.rafi.lmt.exception.QueueStoppedException;
 import com.rafi.lmt.model.LmtQueue;
 import com.rafi.lmt.model.LmtQueueElement;
 import com.rafi.lmt.model.QueueState;
@@ -11,7 +11,6 @@ import com.rafi.lmt.service.LmtQueueService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
@@ -39,7 +38,7 @@ public class LmtQueueServiceImpl implements LmtQueueService {
         }
 
         if (queue.getState() == QueueState.HELD) {
-            throw new QueueHeldException("Queue is in held status");
+            throw new QueueStoppedException("Queue is in held status");
         }
 
         LmtQueueElement newElement = new LmtQueueElement();
@@ -62,7 +61,7 @@ public class LmtQueueServiceImpl implements LmtQueueService {
     }
 
     @Override
-    public LmtQueue retrieve(Long lniata) {
+    public LmtQueue retrieve(String lniata) {
         return queueRepo.findById(lniata).orElse(null);
     }
 
@@ -76,7 +75,7 @@ public class LmtQueueServiceImpl implements LmtQueueService {
         if (queue == null) return;
 
         if (queue != null && queue.getState() == QueueState.HELD) {
-            throw new QueueHeldException("Queue is in held status");
+            throw new QueueStoppedException("Queue is in held status");
         }
 
         if (element.equals(queue.getHead())) {
@@ -101,11 +100,11 @@ public class LmtQueueServiceImpl implements LmtQueueService {
     }
 
     @Override
-    public void dequeueHead(Long lniata) {
+    public void dequeueHead(String lniata) {
         LmtQueue queue = queueRepo.findById(lniata)
                 .orElseThrow(() -> new NoSuchElementException("lniata not found: " + lniata));
-        if (queue.getState() == QueueState.HELD) {
-            throw new QueueHeldException("Queue is in held status");
+        if (queue.getState() == QueueState.STOPPED) {
+            throw new QueueStoppedException("Queue is in STOPPED status");
         }
         LmtQueueElement head = queue.getHead();
         if (head == null) {
@@ -115,7 +114,7 @@ public class LmtQueueServiceImpl implements LmtQueueService {
     }
 
     @Override
-    public void changeState(Long lniata, QueueState state) {
+    public void changeState(String lniata, QueueState state) {
         queueRepo.findById(lniata).ifPresent(queue -> {
             queue.setState(state);
             queueRepo.save(queue);

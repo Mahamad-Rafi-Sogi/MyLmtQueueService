@@ -9,7 +9,7 @@ public class LmtQueueElement {
     @GeneratedValue
     private UUID id;
 
-    private Long lniata;
+    private String lniata;
 
     private String data;
 
@@ -24,8 +24,8 @@ public class LmtQueueElement {
     // Getters and Setters
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
-    public Long getLniata() { return lniata; }
-    public void setLniata(Long lniata) { this.lniata = lniata; }
+    public String getLniata() { return lniata; }
+    public void setLniata(String lniata) { this.lniata = lniata; }
     public String getData() { return data; }
     public void setData(String data) { this.data = data; }
     public LmtQueueElement getNext() { return next; }

@@ -3,7 +3,7 @@ package com.rafi.lmt.dto;
 import java.util.UUID;
 
 public class LmtQueueDto {
-    private Long lniata;
+    private String lniata;
     private UUID headId;
     private UUID tailId;
     private String printerGatewayUrl;
@@ -41,11 +41,11 @@ public class LmtQueueDto {
         this.headId = headId;
     }
 
-    public Long getLniata() {
+    public String getLniata() {
         return lniata;
     }
 
-    public void setLniata(Long lniata) {
+    public void setLniata(String lniata) {
         this.lniata = lniata;
     }
 }

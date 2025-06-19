@@ -1,6 +1,6 @@
 CREATE TABLE lmt_queue (
  id INT PRIMARY KEY,
- lniata INT NOT NULL,
+ lniata VARCHAR(50) NOT NULL,
  state VARCHAR(50) NOT NULL,
  head_id INT,
  tail_id INT

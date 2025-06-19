@@ -5,21 +5,21 @@ import java.io.Serializable;
 public class PrintRequest implements Serializable {
     private static final long serialVersionUID = 1L;
 
-    private Long lniata;
+    private String lniata;
     private byte[] data;
 
     public PrintRequest() {}
 
-    public PrintRequest(Long lniata, byte[] data) {
+    public PrintRequest(String lniata, byte[] data) {
         this.lniata = lniata;
         this.data = data;
     }
 
-    public Long getLniata() {
+    public String getLniata() {
         return lniata;
     }
 
-    public void setLniata(Long lniata) {
+    public void setLniata(String lniata) {
         this.lniata = lniata;
     }
 

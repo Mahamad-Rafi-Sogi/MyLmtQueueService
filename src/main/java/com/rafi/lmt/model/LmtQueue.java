@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 @Entity
 public class LmtQueue {
     @Id
-    private Long lniata;
+    private String lniata;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "head_id")
@@ -24,8 +24,8 @@ public class LmtQueue {
     private QueueState state;
 
     // Getters and Setters
-    public Long getLniata() { return lniata; }
-    public void setLniata(Long lniata) { this.lniata = lniata; }
+    public String getLniata() { return lniata; }
+    public void setLniata(String lniata) { this.lniata = lniata; }
     public LmtQueueElement getHead() { return head; }
     public void setHead(LmtQueueElement head) { this.head = head; }
     public LmtQueueElement getTail() { return tail; }

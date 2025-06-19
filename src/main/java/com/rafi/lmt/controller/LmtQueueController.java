@@ -1,7 +1,7 @@
 package com.rafi.lmt.controller;
 
 import com.rafi.lmt.dto.*;
-import com.rafi.lmt.exception.QueueHeldException;
+import com.rafi.lmt.exception.QueueStoppedException;
 import com.rafi.lmt.model.*;
 import com.rafi.lmt.service.LmtQueueService;
 import jakarta.validation.Valid;
@@ -31,24 +31,23 @@ public class LmtQueueController {
     }
 
     @GetMapping("/retrieve/{lniata}")
-    public LmtQueueDto retrieve(@PathVariable Long lniata) {
-
+    public ResponseEntity<?> retrieve(@PathVariable String lniata) {
         LmtQueue queue = service.retrieve(lniata);
-
-        // Map entity to DTO
+        if (queue == null) {
+            return ResponseEntity.status(404).body("please check lniata is invalid / lniata is not present");
+        }
         LmtQueueDto dto = new LmtQueueDto();
         dto.setLniata(queue.getLniata());
         dto.setHeadId(queue.getHead() != null ? queue.getHead().getId() : null);
         dto.setTailId(queue.getTail() != null ? queue.getTail().getId() : null);
         dto.setPrinterGatewayUrl(queue.getPrinterGatewayUrl());
         dto.setState(queue.getState().name());
-
-        return dto;
+        return ResponseEntity.ok(dto);
     }
 
     @PostMapping("/dequeue/{lniata}")
     public ResponseEntity<?> dequeue(
-            @PathVariable Long lniata,
+            @PathVariable String lniata,
             @RequestParam(required = false) UUID elementId) {
         try {
             if (elementId != null) {
@@ -59,13 +58,13 @@ public class LmtQueueController {
             return ResponseEntity.ok("Dequeued successfully");
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(404).body("ID not found");
-        } catch (QueueHeldException e) {
+        } catch (QueueStoppedException e) {
             return ResponseEntity.status(423).body("Queue is in held status");
         }
     }
 
     @PostMapping("/state-change")
-    public ResponseEntity<?> changeState(@RequestBody StateChangeRequest request) {
+    public ResponseEntity<?> changeState(@Valid @RequestBody StateChangeRequest request) {
         service.changeState(request.getLniata(), request.getState());
         return ResponseEntity.ok("Status updated successfully");
     }

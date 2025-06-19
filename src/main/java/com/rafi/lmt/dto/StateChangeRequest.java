@@ -1,16 +1,23 @@
 package com.rafi.lmt.dto;
 
 import com.rafi.lmt.model.QueueState;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 
 public class StateChangeRequest {
-    private Long lniata;
+
+    @NotBlank(message = "lniata must not be empty")
+    private String lniata;
+
+    @NotNull(message = "state must not be empty")
     private QueueState state;
 
-    public Long getLniata() {
+    public String getLniata() {
         return lniata;
     }
 
-    public void setLniata(Long lniata) {
+    public void setLniata(String lniata) {
         this.lniata = lniata;
     }
 
