@@ -1,6 +1,7 @@
 package com.rafi.lmt.controller;
 
 import com.rafi.lmt.dto.*;
+import com.rafi.lmt.exception.QueueHeldException;
 import com.rafi.lmt.model.*;
 import com.rafi.lmt.service.LmtQueueService;
 import jakarta.validation.Valid;
@@ -26,7 +27,7 @@ public class LmtQueueController {
     @PostMapping("/enqueue")
     public ResponseEntity<?> enqueue(@Valid @RequestBody EnqueueRequest request) {
         service.enqueue(request);
-        return ResponseEntity.ok("Enqueued");
+        return ResponseEntity.ok("Enqueued successfully");
     }
 
     @GetMapping("/retrieve/{lniata}")
@@ -45,20 +46,28 @@ public class LmtQueueController {
         return dto;
     }
 
-    @PostMapping("/dequeue/{elementId}")
-    public ResponseEntity<?> dequeue(@PathVariable UUID elementId) {
+    @PostMapping("/dequeue/{lniata}")
+    public ResponseEntity<?> dequeue(
+            @PathVariable Long lniata,
+            @RequestParam(required = false) UUID elementId) {
         try {
-            service.dequeue(elementId);
-            return ResponseEntity.ok("Dequeued");
+            if (elementId != null) {
+                service.dequeue(elementId);
+            } else {
+                service.dequeueHead(lniata);
+            }
+            return ResponseEntity.ok("Dequeued successfully");
         } catch (NoSuchElementException e) {
             return ResponseEntity.status(404).body("ID not found");
+        } catch (QueueHeldException e) {
+            return ResponseEntity.status(423).body("Queue is in held status");
         }
     }
 
-    @PostMapping("/state-change/{lniata}")
-    public ResponseEntity<?> changeState(@PathVariable Long lniata, @RequestBody QueueState state) {
-        service.changeState(lniata, state);
-        return ResponseEntity.ok("State updated");
+    @PostMapping("/state-change")
+    public ResponseEntity<?> changeState(@RequestBody StateChangeRequest request) {
+        service.changeState(request.getLniata(), request.getState());
+        return ResponseEntity.ok("Status updated successfully");
     }
 
 

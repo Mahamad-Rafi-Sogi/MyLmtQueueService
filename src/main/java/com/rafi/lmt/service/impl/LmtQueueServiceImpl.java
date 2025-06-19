@@ -35,11 +35,11 @@ public class LmtQueueServiceImpl implements LmtQueueService {
         LmtQueue queue = optionalQueue.get();
 
         if (queue.getState() == QueueState.STOPPED) {
-            throw new IllegalStateException("Queue is stopped");
+            throw new IllegalStateException("Queue is in stopped status");
         }
 
         if (queue.getState() == QueueState.HELD) {
-            throw new QueueHeldException("Queue is held");
+            throw new QueueHeldException("Queue is in held status");
         }
 
         LmtQueueElement newElement = new LmtQueueElement();
@@ -76,7 +76,7 @@ public class LmtQueueServiceImpl implements LmtQueueService {
         if (queue == null) return;
 
         if (queue != null && queue.getState() == QueueState.HELD) {
-            throw new QueueHeldException("Queue is held");
+            throw new QueueHeldException("Queue is in held status");
         }
 
         if (element.equals(queue.getHead())) {
@@ -98,6 +98,20 @@ public class LmtQueueServiceImpl implements LmtQueueService {
 
         elementRepo.delete(element);
         queueRepo.save(queue);
+    }
+
+    @Override
+    public void dequeueHead(Long lniata) {
+        LmtQueue queue = queueRepo.findById(lniata)
+                .orElseThrow(() -> new NoSuchElementException("lniata not found: " + lniata));
+        if (queue.getState() == QueueState.HELD) {
+            throw new QueueHeldException("Queue is in held status");
+        }
+        LmtQueueElement head = queue.getHead();
+        if (head == null) {
+            throw new NoSuchElementException("Queue head is null");
+        }
+        dequeue(head.getId());
     }
 
     @Override

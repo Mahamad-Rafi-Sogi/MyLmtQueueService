@@ -9,4 +9,6 @@ public interface LmtQueueService {
     LmtQueue retrieve(Long lniata);
     void dequeue(UUID elementId);
     void changeState(Long lniata, QueueState state);
+
+    void dequeueHead(Long lniata);
 }
