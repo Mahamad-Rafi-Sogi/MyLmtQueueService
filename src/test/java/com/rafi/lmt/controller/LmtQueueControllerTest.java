@@ -31,7 +31,7 @@ class LmtQueueControllerTest {
 
     @Test
     void greeting_returnsWelcome() throws Exception {
-        mockMvc.perform(get("/api/hello"))
+        mockMvc.perform(get("/api/v1/hello"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Welcome Rafi"));
     }
@@ -39,7 +39,7 @@ class LmtQueueControllerTest {
     @Test
     void enqueue_validRequest_returnsOk() throws Exception {
         String json = "{\"lniata\":\"ABC123\",\"data\":\"testdata\"}";
-        mockMvc.perform(post("/api/enqueue")
+        mockMvc.perform(post("/api/v1/enqueue")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isOk())
@@ -59,7 +59,7 @@ class LmtQueueControllerTest {
 
         Mockito.when(service.retrieve("ABC123")).thenReturn(queue);
 
-        mockMvc.perform(get("/api/retrieve/ABC123"))
+        mockMvc.perform(get("/api/v1/retrieve/ABC123"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.lniata").value("ABC123"));
     }
@@ -67,36 +67,36 @@ class LmtQueueControllerTest {
     @Test
     void dequeue_withElementId_success() throws Exception {
         UUID id = UUID.randomUUID();
-        mockMvc.perform(post("/api/dequeue/ABC123")
+        mockMvc.perform(post("/api/v1/dequeue/ABC123")
                         .param("elementId", id.toString()))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Dequeued successfully"));
     }
 
     @Test
-    void dequeueHead_queueHeld_returns423() throws Exception {
-        Mockito.doThrow(new QueueStoppedException("Queue is in held status"))
-                .when(service).dequeueHead("ABC123");
+    void dequeueHead_queueStopped_returns423() throws Exception {
+        Mockito.doThrow(new QueueStoppedException("Queue is in stopped status"))
+                .when(service).dequeueHead2("ABC123");
 
-        mockMvc.perform(post("/api/dequeue/ABC123"))
+        mockMvc.perform(post("/api/v1/dequeue/ABC123"))
                 .andExpect(status().isLocked())
-                .andExpect(content().string("Queue is in held status"));
+                .andExpect(jsonPath("$.message").value("Queue is in stopped status"));
     }
 
     @Test
     void dequeueHead_notFound_returns404() throws Exception {
         Mockito.doThrow(new NoSuchElementException("ID not found"))
-                .when(service).dequeueHead("ABC123");
+                .when(service).dequeueHead2("ABC123");
 
-        mockMvc.perform(post("/api/dequeue/ABC123"))
+        mockMvc.perform(post("/api/v1/dequeue/ABC123"))
                 .andExpect(status().isNotFound())
-                .andExpect(content().string("ID not found"));
+                .andExpect(jsonPath("$.message").value("ID not found"));
     }
 
     @Test
     void changeState_success_returnsOk() throws Exception {
         String json = "{\"lniata\":\"ABC123\",\"state\":\"ACTIVE\"}";
-        mockMvc.perform(post("/api/state-change")
+        mockMvc.perform(post("/api/v1/state-change")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isOk())

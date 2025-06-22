@@ -1,19 +1,19 @@
 package com.rafi.lmt.controller;
 
-import com.rafi.lmt.dto.*;
-import com.rafi.lmt.exception.QueueStoppedException;
-import com.rafi.lmt.model.*;
+import com.rafi.lmt.dto.EnqueueRequest;
+import com.rafi.lmt.dto.LmtQueueDto;
+import com.rafi.lmt.dto.StateChangeRequest;
+import com.rafi.lmt.model.LmtQueue;
 import com.rafi.lmt.service.LmtQueueService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.NoSuchElementException;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/v1")
 public class LmtQueueController {
 
     @Autowired
@@ -26,7 +26,7 @@ public class LmtQueueController {
 
     @PostMapping("/enqueue")
     public ResponseEntity<?> enqueue(@Valid @RequestBody EnqueueRequest request) {
-        service.enqueue(request);
+        service.enqueue(request); // Exceptions will bubble to GlobalExceptionHandler
         return ResponseEntity.ok("Enqueued successfully");
     }
 
@@ -34,8 +34,9 @@ public class LmtQueueController {
     public ResponseEntity<?> retrieve(@PathVariable String lniata) {
         LmtQueue queue = service.retrieve(lniata);
         if (queue == null) {
-            return ResponseEntity.status(404).body("please check lniata is invalid / lniata is not present");
+            throw new IllegalArgumentException("Invalid LNIATA / LNIATA not found");
         }
+
         LmtQueueDto dto = new LmtQueueDto();
         dto.setLniata(queue.getLniata());
         dto.setHeadId(queue.getHead() != null ? queue.getHead().getId() : null);
@@ -49,18 +50,13 @@ public class LmtQueueController {
     public ResponseEntity<?> dequeue(
             @PathVariable String lniata,
             @RequestParam(required = false) UUID elementId) {
-        try {
-            if (elementId != null) {
-                service.dequeue(elementId);
-            } else {
-                service.dequeueHead(lniata);
-            }
-            return ResponseEntity.ok("Dequeued successfully");
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(404).body("ID not found");
-        } catch (QueueStoppedException e) {
-            return ResponseEntity.status(423).body("Queue is in held status");
+
+        if (elementId != null) {
+            service.dequeueElement(lniata, elementId);
+        } else {
+            service.dequeueHead2(lniata);
         }
+        return ResponseEntity.ok("Dequeued successfully");
     }
 
     @PostMapping("/state-change")
@@ -68,6 +64,4 @@ public class LmtQueueController {
         service.changeState(request.getLniata(), request.getState());
         return ResponseEntity.ok("Status updated successfully");
     }
-
-
 }

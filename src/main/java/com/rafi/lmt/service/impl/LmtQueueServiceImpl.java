@@ -1,6 +1,7 @@
 package com.rafi.lmt.service.impl;
 
 import com.rafi.lmt.dto.EnqueueRequest;
+import com.rafi.lmt.exception.QueueEmptyException;
 import com.rafi.lmt.exception.QueueStoppedException;
 import com.rafi.lmt.model.LmtQueue;
 import com.rafi.lmt.model.LmtQueueElement;
@@ -34,11 +35,11 @@ public class LmtQueueServiceImpl implements LmtQueueService {
         LmtQueue queue = optionalQueue.get();
 
         if (queue.getState() == QueueState.STOPPED) {
-            throw new IllegalStateException("Queue is in stopped status");
+            throw new QueueStoppedException("Queue is in stopped status");
         }
 
         if (queue.getState() == QueueState.HELD) {
-            throw new QueueStoppedException("Queue is in held status");
+            throw new IllegalStateException("Queue is in held status");
         }
 
         LmtQueueElement newElement = new LmtQueueElement();
@@ -74,10 +75,6 @@ public class LmtQueueServiceImpl implements LmtQueueService {
         LmtQueue queue = queueRepo.findById(element.getLniata()).orElse(null);
         if (queue == null) return;
 
-        if (queue != null && queue.getState() == QueueState.HELD) {
-            throw new QueueStoppedException("Queue is in held status");
-        }
-
         if (element.equals(queue.getHead())) {
             queue.setHead(element.getNext());
         }
@@ -104,7 +101,7 @@ public class LmtQueueServiceImpl implements LmtQueueService {
         LmtQueue queue = queueRepo.findById(lniata)
                 .orElseThrow(() -> new NoSuchElementException("lniata not found: " + lniata));
         if (queue.getState() == QueueState.STOPPED) {
-            throw new QueueStoppedException("Queue is in STOPPED status");
+            throw new QueueStoppedException("");
         }
         LmtQueueElement head = queue.getHead();
         if (head == null) {
@@ -120,4 +117,63 @@ public class LmtQueueServiceImpl implements LmtQueueService {
             queueRepo.save(queue);
         });
     }
+
+
+    @Override
+    public void dequeueHead2(String lniata) {
+        LmtQueue queue = queueRepo.findById(lniata)
+                .orElseThrow(() -> new NoSuchElementException("lniata not found: " + lniata));
+
+        LmtQueueElement head = queue.getHead();
+
+        if (head == null) {
+            throw new QueueEmptyException("Queue is empty: No Queue found for this lniata - " + lniata);
+        }
+
+        if(queue.getState() == QueueState.STOPPED) {
+            throw new QueueStoppedException("Queue is in stopped status, cannot dequeue");
+        }
+
+        int messageCount = 1;
+        LmtQueueElement temp = head;
+        while (temp.getNext() != null) {
+            messageCount++;
+            temp = temp.getNext();
+        }
+
+        switch (queue.getState()) {
+            case ACTIVE:
+                dequeue(head.getId());
+                if (messageCount > 1) {
+                    // Transmit next message (need implement transmission logic here)
+                }
+                // Remain ACTIVE
+                break;
+            case HELD:
+                dequeue(head.getId());
+                break;
+
+            case TEMP_HOLD:
+                dequeue(head.getId());
+                queue.setState(QueueState.ACTIVE);
+                queueRepo.save(queue);
+                if (messageCount > 1) {
+                    // Transmit next message (need implement transmission logic here)
+                }
+                break;
+        }
+    }
+
+    @Override
+    public void dequeueElement(String lniata, UUID elementId) {
+        LmtQueue queue = queueRepo.findById(lniata)
+                .orElseThrow(() -> new NoSuchElementException("lniata not found: " + lniata));
+
+        if(queue.getState() == QueueState.STOPPED) {
+            throw new QueueStoppedException("Queue is in STOPPED status, cannot dequeue");
+        }
+
+        dequeue(elementId);
+    }
+
 }

@@ -11,4 +11,8 @@ public interface LmtQueueService {
     void changeState(String lniata, QueueState state);
 
     void dequeueHead(String lniata);
+
+    void dequeueHead2(String lniata);
+
+    void dequeueElement(String lniata, UUID elementId);
 }
