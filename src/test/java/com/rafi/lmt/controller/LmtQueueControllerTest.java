@@ -67,10 +67,18 @@ class LmtQueueControllerTest {
     @Test
     void dequeue_withElementId_success() throws Exception {
         UUID id = UUID.randomUUID();
+
         mockMvc.perform(post("/api/v1/dequeue/ABC123")
                         .param("elementId", id.toString()))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Dequeued successfully"));
+                .andExpect(content().string("Dequeued elementId successfully"));
+    }
+
+    @Test
+    void dequeueHead_success() throws Exception {
+        mockMvc.perform(post("/api/v1/dequeue/ABC123"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Dequeued head successfully"));
     }
 
     @Test

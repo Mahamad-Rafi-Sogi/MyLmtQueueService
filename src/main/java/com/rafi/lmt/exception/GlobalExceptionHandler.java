@@ -56,7 +56,7 @@ public class GlobalExceptionHandler {
             WebRequest request) {
         String msg = (ex.getCause() instanceof IllegalArgumentException && ex.getMessage().contains("QueueState"))
                 ? "Invalid or missing state value"
-                : "Malformed JSON request";
+                : "Malformed JSON request / please check your request body";
         return buildResponse(HttpStatus.BAD_REQUEST, msg, request);
     }
 

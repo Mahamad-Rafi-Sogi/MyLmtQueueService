@@ -53,10 +53,11 @@ public class LmtQueueController {
 
         if (elementId != null) {
             service.dequeueElement(lniata, elementId);
+            return ResponseEntity.ok("Dequeued elementId successfully");
         } else {
             service.dequeueHead2(lniata);
+            return ResponseEntity.ok("Dequeued head successfully");
         }
-        return ResponseEntity.ok("Dequeued successfully");
     }
 
     @PostMapping("/state-change")
