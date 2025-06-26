@@ -1,6 +1,7 @@
 package com.rafi.lmt.service.impl;
 
 import com.rafi.lmt.dto.EnqueueRequest;
+import com.rafi.lmt.dto.LmtQueueDto;
 import com.rafi.lmt.exception.QueueEmptyException;
 import com.rafi.lmt.exception.QueueStoppedException;
 import com.rafi.lmt.model.LmtQueue;
@@ -174,6 +175,32 @@ public class LmtQueueServiceImpl implements LmtQueueService {
         }
 
         dequeue(elementId);
+    }
+
+    public LmtQueue createLniata(LmtQueueDto dto) {
+        LmtQueue queue = new LmtQueue();
+        queue.setLniata(dto.getLniata());
+        queue.setPrinterGatewayUrl(dto.getPrinterGatewayUrl());
+        queue.setState(dto.getState() != null ? Enum.valueOf(com.rafi.lmt.model.QueueState.class, dto.getState()) : com.rafi.lmt.model.QueueState.ACTIVE);
+        return queueRepo.save(queue);
+    }
+
+    public void deleteLniata(String lniata) {
+        LmtQueue queue = queueRepo.findById(lniata)
+                .orElseThrow(() -> new NoSuchElementException("Queue not found: " + lniata));
+        queueRepo.delete(queue);
+    }
+
+    public LmtQueue configureLniata(String lniata, LmtQueueDto dto) {
+        LmtQueue queue = queueRepo.findById(lniata)
+                .orElseThrow(() -> new NoSuchElementException("Queue not found: " + lniata));
+        if (dto.getPrinterGatewayUrl() != null) {
+            queue.setPrinterGatewayUrl(dto.getPrinterGatewayUrl());
+        }
+        if (dto.getState() != null) {
+            queue.setState(Enum.valueOf(com.rafi.lmt.model.QueueState.class, dto.getState()));
+        }
+        return queueRepo.save(queue);
     }
 
 }

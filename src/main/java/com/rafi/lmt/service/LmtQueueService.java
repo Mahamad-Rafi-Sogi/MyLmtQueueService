@@ -1,6 +1,7 @@
 package com.rafi.lmt.service;
 
 import com.rafi.lmt.dto.EnqueueRequest;
+import com.rafi.lmt.dto.LmtQueueDto;
 import com.rafi.lmt.model.*;
 import java.util.UUID;
 
@@ -15,4 +16,10 @@ public interface LmtQueueService {
     void dequeueHead2(String lniata);
 
     void dequeueElement(String lniata, UUID elementId);
+
+    LmtQueue createLniata(LmtQueueDto dto);
+
+    void deleteLniata(String lniata);
+
+    LmtQueue configureLniata(String lniata, LmtQueueDto dto);
 }

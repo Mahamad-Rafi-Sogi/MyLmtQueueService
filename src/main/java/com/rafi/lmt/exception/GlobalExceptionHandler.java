@@ -1,6 +1,6 @@
 package com.rafi.lmt.exception;
 
-import com.rafi.lmt.dto.ApiErrorResponse;
+import com.rafi.lmt.dto.ApiResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -11,15 +11,14 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 
 import java.time.LocalDateTime;
-import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    private ResponseEntity<ApiErrorResponse> buildResponse(HttpStatus status, String message, WebRequest request) {
-        ApiErrorResponse response = new ApiErrorResponse(
+    private ResponseEntity<ApiResponse> buildResponse(HttpStatus status, String message, WebRequest request) {
+        ApiResponse response = new ApiResponse(
                 LocalDateTime.now(),
                 status.value(),
                 status.getReasonPhrase(),
@@ -30,7 +29,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiErrorResponse> handleValidationException(
+    public ResponseEntity<ApiResponse> handleValidationException(
             MethodArgumentNotValidException ex,
             WebRequest request) {
 
@@ -44,14 +43,14 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ApiErrorResponse> handleIllegalArgument(
+    public ResponseEntity<ApiResponse> handleIllegalArgument(
             IllegalArgumentException ex,
             WebRequest request) {
         return buildResponse(HttpStatus.BAD_REQUEST, ex.getMessage(), request);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ApiErrorResponse> handleNotReadable(
+    public ResponseEntity<ApiResponse> handleNotReadable(
             HttpMessageNotReadableException ex,
             WebRequest request) {
         String msg = (ex.getCause() instanceof IllegalArgumentException && ex.getMessage().contains("QueueState"))
@@ -61,7 +60,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
-    public ResponseEntity<ApiErrorResponse> handleMissingParam(
+    public ResponseEntity<ApiResponse> handleMissingParam(
             MissingServletRequestParameterException ex,
             WebRequest request) {
         String msg = "Missing required parameter: " + ex.getParameterName();
@@ -69,21 +68,21 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(QueueEmptyException.class)
-    public ResponseEntity<ApiErrorResponse> handleQueueEmpty(
+    public ResponseEntity<ApiResponse> handleQueueEmpty(
             QueueEmptyException ex,
             WebRequest request) {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), request);
     }
 
     @ExceptionHandler(QueueStoppedException.class)
-    public ResponseEntity<ApiErrorResponse> handleQueueStoppedException(
+    public ResponseEntity<ApiResponse> handleQueueStoppedException(
             QueueStoppedException ex,
             WebRequest request) {
         return buildResponse(HttpStatus.LOCKED, ex.getMessage(), request);
     }
 
     @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<ApiErrorResponse> handleNoSuchElementException(
+    public ResponseEntity<ApiResponse> handleNoSuchElementException(
             NoSuchElementException ex,
             WebRequest request) {
         return buildResponse(HttpStatus.NOT_FOUND, ex.getMessage(), request);
