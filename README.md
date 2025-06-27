@@ -1,58 +1,170 @@
-🧾 LMT Queue System
-The LMT Queue System is a lightweight and extensible queue management service designed to handle message ordering and processing with precision. It is built with a custom doubly-linked list logic stored in a relational database (e.g., MySQL), enabling queue operations like enqueueing, dequeuing, and traversing in a persistent and scalable manner.
 
-🏗️ Architecture Overview
-LMT_QUEUE Table
-Represents a queue for a specific LNIATA (identifier).
-Contains:
+---
+# LMT Queue System
 
-HEAD_ID: Points to the first element in the queue.
+A Spring Boot application for managing print job queues, provisioning, and printer gateway integration.
 
-TAIL_ID: Points to the last element in the queue.
+## Table of Contents
 
-STATE: Queue state (e.g., ACTIVE, INACTIVE).
+- [Overview](#overview)
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Setup & Installation](#setup--installation)
+- [Build & Run](#build--run)
+- [Testing](#testing)
+- [API Endpoints](#api-endpoints)
+    - [PrinterService / PosQSystem](#printersystem--posqsystem)
+    - [PrinterGateWaySystem](#printergatewaysystem)
+    - [ProvisioningSystem](#provisioningsystem)
+- [Postman Collection](#postman-collection)
+- [License](#license)
 
-PRINTER_GATEWAY_URL: Optional URL for processing integration.
+---
 
-LMT_QUEUE_ELEMENT Table
-Represents individual elements in the queue, linked with:
+## Overview
 
-PREVIOUS_ID and NEXT_ID (forming a doubly-linked list).
+LMT Queue System is a RESTful service for managing print jobs, printer provisioning, and printer gateway state. It supports enqueueing/dequeueing jobs, updating printer states, and provisioning printer identifiers (lniata).
 
-DATA: Payload (stored as hex-encoded data).
+## Features
 
-📌 Features
-Persistent queue backed by a relational database
+- Enqueue and dequeue print jobs
+- Retrieve jobs by lniata
+- Change printer state (e.g., STOPPED, HELD)
+- Provision, update, and delete lniata
+- API documented via Postman collection
 
-Doubly linked list structure enables fast inserts and removals
+## Tech Stack
 
-Supports multiple queues identified by LNIATA
+- Java
+- Spring Boot
+- Spring Data JPA
+- Maven
+- SQL (database)
+- Postman (API documentation/testing)
 
-Designed for use in asynchronous or batch message processing pipelines
+## Setup & Installation
 
-Easily integrates with external printer gateways or processing services
+1. **Clone the repository:**
+   ```sh
+   git clone <your-repo-url>
+   cd <your-project-directory>
+   ```
 
-📩 Sample Entry
--- Queue
-ID | LNIATA | STATE   | HEAD_ID                             | TAIL_ID                             | PRINTER_GATEWAY_URL
----|--------|---------|--------------------------------------|--------------------------------------|----------------------
-2  | 67890  | INACTIVE| 550e8400-e29b-41d4-a716-446655440001| 550e8400-e29b-41d4-a716-446655440002| null
+2. **Configure the database:**
+    - Update `application.properties` with your DB credentials.
 
--- Elements
-ID                                   | LNIATA | DATA                              | PREVIOUS_ID                           | NEXT_ID
-------------------------------------|--------|-----------------------------------|---------------------------------------|---------------------------------------
-550e8400-e29b-41d4-a716-446655440001| 67890  | 53616d706c6520446174612032       | null                                  | 550e8400-e29b-41d4-a716-446655440002
-550e8400-e29b-41d4-a716-446655440002| 67890  | 353336313664373036633635...      | 550e8400-e29b-41d4-a716-446655440001 | null
+3. **Import Postman Collection:**
+    - Use `LMT Queue System - Local.postman_collection.json` in Postman for API testing.
 
-🚀 Tech Stack
-Java + Spring Boot
-MySQL / MariaDB
-JPA / Hibernate
+## Build & Run
 
-REST API for queue operations
+**Build the project:**
+```sh
+mvn clean install
+```
 
-📚 Endpoints (examples)
-Method	Endpoint	Description
-POST	/emqueue	Enqueue new data element
-GET	/queue/{id}	View queue and its state
-DELETE	/dequeue	Remove head of the queue
+**Run the application:**
+```sh
+mvn spring-boot:run
+```
+or
+```sh
+java -jar target/<your-jar-file>.jar
+```
+
+The server will start at `http://localhost:8080`.
+
+## Testing
+
+**Run all tests:**
+```sh
+mvn test
+```
+
+## API Endpoints
+
+### PrinterService / PosQSystem
+
+#### Enqueue Print Job
+
+- **POST** `/api/v1/enqueue`
+- **Body:**
+  ```json
+  {
+    "lniata": "ABC111",
+    "data": "D3"
+  }
+  ```
+- **Description:** Adds a print job to the queue for the specified lniata.
+
+---
+
+### PrinterGateWaySystem
+
+#### Retrieve Job from Queue
+
+- **GET** `/api/v1/retrieve/{lniata}`
+- **Description:** Retrieves the next print job for the given lniata.
+
+#### Status Change
+
+- **POST** `/api/v1/state-change`
+- **Body:**
+  ```json
+  {
+    "lniata": "ABC111",
+    "state": "STOPPED"
+  }
+  ```
+- **Description:** Changes the state of the printer (e.g., STOPPED, HELD).
+
+#### Dequeue a Job
+
+- **POST** `/api/v1/dequeue/{lniata}`
+- **Description:** Removes the next job from the queue for the given lniata.
+
+---
+
+### ProvisioningSystem
+
+#### Create lniata
+
+- **POST** `/api/v1/provision`
+- **Body:**
+  ```json
+  {
+    "lniata": "ABC111"
+  }
+  ```
+- **Description:** Provisions a new lniata (printer identifier).
+
+#### Update lniata
+
+- **PUT** `/api/v1/provision/{lniata}`
+- **Body:**
+  ```json
+  {
+    "lniata": "ABC111"
+  }
+  ```
+- **Description:** Updates an existing lniata.
+
+#### Delete lniata
+
+- **DELETE** `/api/v1/provision/{lniata}`
+- **Description:** Deletes the specified lniata.
+
+---
+
+## Postman Collection
+
+- The Postman collection file `LMT Queue System - Local.postman_collection.json` is included in the repository.
+- Import it into Postman to test all endpoints with sample requests.
+
+## License
+
+This project is licensed under your chosen license.
+
+---
+
+**Note:** Update `<your-repo-url>`, `<your-project-directory>`, and `<your-jar-file>.jar` as appropriate. Add more details as needed for your specific implementation.
