@@ -14,12 +14,13 @@ public class LmtQueueElement {
     private String data;
 
     @OneToOne
+    @JoinColumn(name = "previous_id")
+    private LmtQueueElement previous;
+
+    @OneToOne
     @JoinColumn(name = "next_id")
     private LmtQueueElement next;
 
-    @OneToOne
-    @JoinColumn(name = "previous_id")
-    private LmtQueueElement previous;
 
     // Getters and Setters
     public UUID getId() { return id; }

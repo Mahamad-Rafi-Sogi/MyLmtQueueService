@@ -1,16 +1,17 @@
 CREATE TABLE lmt_queue (
- id INT PRIMARY KEY,
- lniata VARCHAR(50) NOT NULL,
+ id INT PRIMARY KEY AUTO_INCREMENT,
+ lniata VARCHAR(50) NOT NULL UNIQUE,
  state VARCHAR(50) NOT NULL,
- head_id INT,
- tail_id INT
+ head_id UUID,
+ tail_id UUID,
+ printer_gateway_url VARCHAR(50)
 --  created_at TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP,
 --  updated_at TIMESTAMP(0) DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 CREATE TABLE lmt_queue_element (
  id UUID PRIMARY KEY,
- lniata INT NOT NULL,
+ lniata VARCHAR(50) NOT NULL,
  data VARCHAR(255),
  previous_id UUID,
  next_id UUID

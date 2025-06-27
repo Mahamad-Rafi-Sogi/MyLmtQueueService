@@ -33,7 +33,8 @@ class LmtQueueControllerTest {
     void greeting_returnsWelcome() throws Exception {
         mockMvc.perform(get("/api/v1/hello"))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Welcome Rafi"));
+                .andExpect(jsonPath("$.message").value("Welcome Rafi"))
+                .andExpect(jsonPath("$.status").value(200));
     }
 
     @Test
@@ -43,7 +44,8 @@ class LmtQueueControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Enqueued successfully"));
+                .andExpect(jsonPath("$.message").value("Enqueued successfully"))
+                .andExpect(jsonPath("$.status").value(200));
     }
 
     @Test
@@ -71,14 +73,16 @@ class LmtQueueControllerTest {
         mockMvc.perform(post("/api/v1/dequeue/ABC123")
                         .param("elementId", id.toString()))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Dequeued elementId successfully"));
+                .andExpect(jsonPath("$.message").value("Dequeued elementId successfully"))
+                .andExpect(jsonPath("$.status").value(200));
     }
 
     @Test
     void dequeueHead_success() throws Exception {
         mockMvc.perform(post("/api/v1/dequeue/ABC123"))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Dequeued head successfully"));
+                .andExpect(jsonPath("$.message").value("Dequeued head successfully"))
+                .andExpect(jsonPath("$.status").value(200));
     }
 
     @Test
@@ -108,6 +112,40 @@ class LmtQueueControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Status updated successfully"));
+                .andExpect(jsonPath("$.message").value("Status updated successfully"))
+                .andExpect(jsonPath("$.status").value(200));
+    }
+
+    @Test
+    void createQueue_success_returnsOk() throws Exception {
+        String json = "{\"lniata\":\"ABC123\"}";
+        mockMvc.perform(post("/api/v1/provision/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Lniata created successfully"))
+                .andExpect(jsonPath("$.status").value(200));
+    }
+
+    @Test
+    void deleteQueue_success_returnsOk() throws Exception {
+        String json = "{\"lniata\":\"ABC123\"}";
+        mockMvc.perform(delete("/api/v1/provision/delete")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Lniata deleted successfully"))
+                .andExpect(jsonPath("$.status").value(200));
+    }
+
+    @Test
+    void configureQueue_success_returnsOk() throws Exception {
+        String json = "{\"lniata\":\"ABC123\"}";
+        mockMvc.perform(put("/api/v1/provision/configure/ABC123")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(json))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Lniata configured successfully"))
+                .andExpect(jsonPath("$.status").value(200));
     }
 }

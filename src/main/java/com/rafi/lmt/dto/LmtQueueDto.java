@@ -1,9 +1,16 @@
 package com.rafi.lmt.dto;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+
 import java.util.UUID;
 
 public class LmtQueueDto {
+
+    @NotBlank(message = "lniata cannot be blank")
+    @Pattern(regexp = "^[0-9A-Fa-f]{6}$", message = "lniata must be 6 hex characters (0-9, A-F)")
     private String lniata;
+
     private UUID headId;
     private UUID tailId;
     private String printerGatewayUrl;

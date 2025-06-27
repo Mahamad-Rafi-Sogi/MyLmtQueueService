@@ -5,7 +5,12 @@ import jakarta.persistence.*;
 
 @Entity
 public class LmtQueue {
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(unique = true, nullable = false)
     private String lniata;
 
     @OneToOne(cascade = CascadeType.ALL)
@@ -18,6 +23,7 @@ public class LmtQueue {
     @JsonIgnore
     private LmtQueueElement tail;
 
+    @Column(name = "printer_gateway_url")
     private String printerGatewayUrl;
 
     @Enumerated(EnumType.STRING)

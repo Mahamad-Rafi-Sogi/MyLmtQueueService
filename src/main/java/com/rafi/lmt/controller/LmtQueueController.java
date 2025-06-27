@@ -1,11 +1,10 @@
 package com.rafi.lmt.controller;
 
-import com.rafi.lmt.dto.ApiResponse;
-import com.rafi.lmt.dto.EnqueueRequest;
-import com.rafi.lmt.dto.LmtQueueDto;
-import com.rafi.lmt.dto.StateChangeRequest;
+import com.rafi.lmt.dto.*;
 import com.rafi.lmt.model.LmtQueue;
 import com.rafi.lmt.service.LmtQueueService;
+import io.swagger.v3.oas.annotations.Hidden;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +21,7 @@ public class LmtQueueController {
     @Autowired
     private LmtQueueService service;
 
+    @Hidden
     @GetMapping("/hello")
     public ResponseEntity<ApiResponse> greeting(HttpServletRequest request) {
         return ResponseEntity.ok(
@@ -29,6 +29,7 @@ public class LmtQueueController {
         );
     }
 
+    @Operation(summary = "Enqueue", tags = {"PosQSystem"})
     @PostMapping("/enqueue")
     public ResponseEntity<ApiResponse> enqueue(@Valid @RequestBody EnqueueRequest requestBody, HttpServletRequest request) {
         service.enqueue(requestBody);
@@ -37,6 +38,7 @@ public class LmtQueueController {
         );
     }
 
+    @Operation(summary = "Retrieve", tags = {"PrinterGatewaySystem"})
     @GetMapping("/retrieve/{lniata}")
     public ResponseEntity<LmtQueueDto> retrieve(@PathVariable String lniata) {
         LmtQueue queue = service.retrieve(lniata);
@@ -52,6 +54,7 @@ public class LmtQueueController {
         return ResponseEntity.ok(dto);
     }
 
+    @Operation(summary = "Dequeue", tags = {"PrinterGatewaySystem"})
     @PostMapping("/dequeue/{lniata}")
     public ResponseEntity<ApiResponse> dequeue(
             @PathVariable String lniata,
@@ -71,6 +74,7 @@ public class LmtQueueController {
         }
     }
 
+    @Operation(summary = "Status Update", tags = {"PrinterGatewaySystem"})
     @PostMapping("/state-change")
     public ResponseEntity<ApiResponse> changeState(@Valid @RequestBody StateChangeRequest requestBody, HttpServletRequest request) {
         service.changeState(requestBody.getLniata(), requestBody.getState());
@@ -79,27 +83,30 @@ public class LmtQueueController {
         );
     }
 
-    @PostMapping("/provision")
-    public ResponseEntity<ApiResponse> createQueue(@RequestBody LmtQueueDto dto, HttpServletRequest request) {
+    @Operation(summary = "Create Lniata", tags = {"ProvisionSystem"})
+    @PostMapping("/provision/create")
+    public ResponseEntity<ApiResponse> createQueue(@Valid @RequestBody LmtQueueDto dto, HttpServletRequest request) {
         LmtQueue created = service.createLniata(dto);
         return ResponseEntity.ok(
-                new ApiResponse(LocalDateTime.now(), 200, null, "Queue created successfully", request.getRequestURI())
+                new ApiResponse(LocalDateTime.now(), 200, null, "Lniata created successfully", request.getRequestURI())
         );
     }
 
-    @DeleteMapping("/provision/{lniata}")
-    public ResponseEntity<ApiResponse> deleteQueue(@PathVariable String lniata, HttpServletRequest request) {
-        service.deleteLniata(lniata);
+    @Operation(summary = "Delete Lniata", tags = {"ProvisionSystem"})
+    @DeleteMapping("/provision/delete")
+    public ResponseEntity<ApiResponse> deleteQueue(@Valid @RequestBody DeleteQueueRequest deleteRequest, HttpServletRequest request) {
+        service.deleteLniata(deleteRequest.getLniata());
         return ResponseEntity.ok(
-                new ApiResponse(LocalDateTime.now(), 200, null, "Queue deleted successfully", request.getRequestURI())
+                new ApiResponse(LocalDateTime.now(), 200, null, "Lniata deleted successfully", request.getRequestURI())
         );
     }
 
+    @Operation(summary = "Configure Lniata", tags = {"ProvisionSystem"})
     @PutMapping("/provision/configure/{lniata}")
-    public ResponseEntity<ApiResponse> configureQueue(@PathVariable String lniata, @RequestBody LmtQueueDto dto, HttpServletRequest request) {
+    public ResponseEntity<ApiResponse> configureQueue(@PathVariable String lniata, @Valid @RequestBody LmtQueueDto dto, HttpServletRequest request) {
         LmtQueue updated = service.configureLniata(lniata, dto);
         return ResponseEntity.ok(
-                new ApiResponse(LocalDateTime.now(), 200, null, "Queue configured successfully", request.getRequestURI())
+                new ApiResponse(LocalDateTime.now(), 200, null, "Lniata configured successfully", request.getRequestURI())
         );
     }
 }

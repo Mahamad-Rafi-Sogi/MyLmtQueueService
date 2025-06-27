@@ -29,7 +29,7 @@ public class LmtQueueServiceImpl implements LmtQueueService {
     @Override
     public void enqueue(EnqueueRequest request) {
 
-        Optional<LmtQueue> optionalQueue = queueRepo.findById(request.getLniata());
+        Optional<LmtQueue> optionalQueue = queueRepo.findByLniata(request.getLniata());
         if (optionalQueue.isEmpty()) {
             throw new IllegalArgumentException("invalid lniata");
         }
@@ -64,16 +64,16 @@ public class LmtQueueServiceImpl implements LmtQueueService {
 
     @Override
     public LmtQueue retrieve(String lniata) {
-        return queueRepo.findById(lniata).orElse(null);
+        return queueRepo.findByLniata(lniata).orElse(null);
     }
 
     @Override
     public void dequeue(UUID elementId) {
         Optional<LmtQueueElement> optElement = elementRepo.findById(elementId);
-        if (optElement.isEmpty()) throw new NoSuchElementException("Element ID not found: " + elementId);;
+        if (optElement.isEmpty()) throw new NoSuchElementException("Element ID not found: " + elementId);
 
         LmtQueueElement element = optElement.get();
-        LmtQueue queue = queueRepo.findById(element.getLniata()).orElse(null);
+        LmtQueue queue = queueRepo.findByLniata(element.getLniata()).orElse(null);
         if (queue == null) return;
 
         if (element.equals(queue.getHead())) {
@@ -99,7 +99,7 @@ public class LmtQueueServiceImpl implements LmtQueueService {
 
     @Override
     public void dequeueHead(String lniata) {
-        LmtQueue queue = queueRepo.findById(lniata)
+        LmtQueue queue = queueRepo.findByLniata(lniata)
                 .orElseThrow(() -> new NoSuchElementException("lniata not found: " + lniata));
         if (queue.getState() == QueueState.STOPPED) {
             throw new QueueStoppedException("");
@@ -113,7 +113,7 @@ public class LmtQueueServiceImpl implements LmtQueueService {
 
     @Override
     public void changeState(String lniata, QueueState state) {
-        queueRepo.findById(lniata).ifPresent(queue -> {
+        queueRepo.findByLniata(lniata).ifPresent(queue -> {
             queue.setState(state);
             queueRepo.save(queue);
         });
@@ -122,7 +122,7 @@ public class LmtQueueServiceImpl implements LmtQueueService {
 
     @Override
     public void dequeueHead2(String lniata) {
-        LmtQueue queue = queueRepo.findById(lniata)
+        LmtQueue queue = queueRepo.findByLniata(lniata)
                 .orElseThrow(() -> new NoSuchElementException("lniata not found: " + lniata));
 
         LmtQueueElement head = queue.getHead();
@@ -167,7 +167,7 @@ public class LmtQueueServiceImpl implements LmtQueueService {
 
     @Override
     public void dequeueElement(String lniata, UUID elementId) {
-        LmtQueue queue = queueRepo.findById(lniata)
+        LmtQueue queue = queueRepo.findByLniata(lniata)
                 .orElseThrow(() -> new NoSuchElementException("lniata not found: " + lniata));
 
         if(queue.getState() == QueueState.STOPPED) {
@@ -182,18 +182,21 @@ public class LmtQueueServiceImpl implements LmtQueueService {
         queue.setLniata(dto.getLniata());
         queue.setPrinterGatewayUrl(dto.getPrinterGatewayUrl());
         queue.setState(dto.getState() != null ? Enum.valueOf(com.rafi.lmt.model.QueueState.class, dto.getState()) : com.rafi.lmt.model.QueueState.ACTIVE);
+        queue.setHead(null);
+        queue.setTail(null);
         return queueRepo.save(queue);
     }
 
     public void deleteLniata(String lniata) {
-        LmtQueue queue = queueRepo.findById(lniata)
-                .orElseThrow(() -> new NoSuchElementException("Queue not found: " + lniata));
+        LmtQueue queue = queueRepo.findByLniata(lniata)
+                .orElseThrow(() -> new NoSuchElementException("LNIATA not found: " + lniata));
+
         queueRepo.delete(queue);
     }
 
     public LmtQueue configureLniata(String lniata, LmtQueueDto dto) {
-        LmtQueue queue = queueRepo.findById(lniata)
-                .orElseThrow(() -> new NoSuchElementException("Queue not found: " + lniata));
+        LmtQueue queue = queueRepo.findByLniata(lniata)
+                .orElseThrow(() -> new NoSuchElementException("lniata not found: " + lniata));
         if (dto.getPrinterGatewayUrl() != null) {
             queue.setPrinterGatewayUrl(dto.getPrinterGatewayUrl());
         }
