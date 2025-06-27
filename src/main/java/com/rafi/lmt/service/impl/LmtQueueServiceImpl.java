@@ -195,14 +195,22 @@ public class LmtQueueServiceImpl implements LmtQueueService {
     }
 
     public LmtQueue configureLniata(String lniata, LmtQueueDto dto) {
+        if (lniata == null || lniata.isEmpty()) {
+            throw new IllegalArgumentException("lniata is missing or empty");
+        }
+        if (dto.getPrinterGatewayUrl() == null || dto.getPrinterGatewayUrl().isEmpty()) {
+            throw new IllegalArgumentException("printerGatewayUrl is missing or empty");
+        }
+
         LmtQueue queue = queueRepo.findByLniata(lniata)
                 .orElseThrow(() -> new NoSuchElementException("lniata not found: " + lniata));
-        if (dto.getPrinterGatewayUrl() != null) {
-            queue.setPrinterGatewayUrl(dto.getPrinterGatewayUrl());
-        }
+
+        queue.setPrinterGatewayUrl(dto.getPrinterGatewayUrl());
+
         if (dto.getState() != null) {
             queue.setState(Enum.valueOf(com.rafi.lmt.model.QueueState.class, dto.getState()));
         }
+
         return queueRepo.save(queue);
     }
 

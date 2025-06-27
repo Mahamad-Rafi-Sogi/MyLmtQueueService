@@ -102,9 +102,9 @@ public class LmtQueueController {
     }
 
     @Operation(summary = "Configure Lniata", tags = {"ProvisionSystem"})
-    @PutMapping("/provision/configure/{lniata}")
-    public ResponseEntity<ApiResponse> configureQueue(@PathVariable String lniata, @Valid @RequestBody LmtQueueDto dto, HttpServletRequest request) {
-        LmtQueue updated = service.configureLniata(lniata, dto);
+    @PutMapping("/provision/configure")
+    public ResponseEntity<ApiResponse> configureQueue(@Valid @RequestBody LmtQueueDto dto, HttpServletRequest request) {
+        LmtQueue updated = service.configureLniata(dto.getLniata(), dto);
         return ResponseEntity.ok(
                 new ApiResponse(LocalDateTime.now(), 200, null, "Lniata configured successfully", request.getRequestURI())
         );

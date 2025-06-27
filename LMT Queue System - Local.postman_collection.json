@@ -1,0 +1,225 @@
+{
+	"info": {
+		"_postman_id": "9675fd43-54a0-4894-a5d7-1f8db20c6a56",
+		"name": "LMT Queue System - Local",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "45245125"
+	},
+	"item": [
+		{
+			"name": "PrinterService / PosQSystem",
+			"item": [
+				{
+					"name": "Enqueue Print Job",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"lniata\": \"ABC111\",\n  \"data\": \"D3\"\n}"
+						},
+						"url": {
+							"raw": "localhost:8080/api/v1/enqueue",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"enqueue"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "PrinterGateWaySystem",
+			"item": [
+				{
+					"name": "Retrieve Job from Queue",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/v1/retrieve/ABC111",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"retrieve",
+								"ABC111"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Status Change",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"lniata\":\"ABC111\",\r\n    \"state\":\"STOPPED\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/api/v1/state-change",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"state-change"
+							]
+						},
+						"description": "Generated from cURL: curl -X POST \"http://localhost:8080/api/state-change\" \\\r\n  -H \"Content-Type: application/json\" \\\r\n  -d '{\"lniata\":123456,\"state\":\"HELD\"}'"
+					},
+					"response": []
+				},
+				{
+					"name": "Dequeue a Job",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/v1/dequeue/ABC111",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"dequeue",
+								"ABC111"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "ProvisioningSystem",
+			"item": [
+				{
+					"name": "Create lniata",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"lniata\":\"ABC111\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/v1/provision",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"provision"
+							]
+						},
+						"description": "Generated from cURL: curl --location 'localhost:8080/api/v1/provision' \\\r\n--header 'Content-Type: application/json' \\\r\n--data '{\r\n    \"lniata\":\"ABC111\"\r\n}'"
+					},
+					"response": []
+				},
+				{
+					"name": "Update lniata",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"lniata\":\"ABC111\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:8080/api/v1/provision/ABC111",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"provision",
+								"ABC111"
+							]
+						},
+						"description": "Generated from cURL: curl --location --request PUT 'localhost:8080/api/v1/provision/ABC111' \\\r\n--header 'Content-Type: application/json' \\\r\n--data '{\r\n    \"lniata\":\"ABC111\"\r\n}'"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete lniata",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "localhost:8080/api/v1/provision/ABC222",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"api",
+								"v1",
+								"provision",
+								"ABC222"
+							]
+						},
+						"description": "Generated from cURL: curl --location --request DELETE 'localhost:8080/api/v1/provision/ABC222'"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

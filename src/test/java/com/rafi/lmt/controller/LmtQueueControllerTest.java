@@ -140,8 +140,8 @@ class LmtQueueControllerTest {
 
     @Test
     void configureQueue_success_returnsOk() throws Exception {
-        String json = "{\"lniata\":\"ABC123\"}";
-        mockMvc.perform(put("/api/v1/provision/configure/ABC123")
+        String json = "{\"lniata\":\"ABC123\",\"printerGatewayUrl\":\"https://www.something.com\",\"state\":\"ACTIVE\"}";
+        mockMvc.perform(put("/api/v1/provision/configure")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(json))
                 .andExpect(status().isOk())
